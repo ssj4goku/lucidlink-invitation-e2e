@@ -1,0 +1,17 @@
+node_modules/
+
+# Credentials and saved sessions — never committed.
+.env
+.auth/
+
+# Run output. Traces and videos can contain session tokens and invite links,
+# which are bearer credentials.
+test-results/
+reports/
+playwright-report/
+blob-report/
+playwright/.cache/
+docs/
+
+# Real values — never committed.
+.env.prod*

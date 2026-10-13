@@ -1,0 +1,29 @@
+{
+  "name": "lucidlink-invitation-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright UI automation for the LucidLink Individual Invitation and Accept Invitation flows",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test --project=chromium",
+    "test:smoke": "playwright test --project=chromium --grep @smoke",
+    "test:headed": "playwright test --project=chromium --headed",
+    "test:ui": "npx playwright test --project=chromium --ui",
+    "test:flows": "playwright test --project=chromium src/tests/invitation",
+    "test:negative": "playwright test --project=chromium src/tests/negative",
+    "report": "playwright show-report",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.0",
+    "@types/node": "22.7.5",
+    "dotenv": "16.4.5",
+    "eslint": "9.13.0",
+    "prettier": "3.3.3",
+    "typescript": "5.6.3",
+    "typescript-eslint": "8.11.0"
+  }
+}

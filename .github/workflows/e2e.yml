@@ -1,0 +1,78 @@
+name: E2E
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # nightly, 02:00 UTC, full suite
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Only tests whose title matches this tag/regex, e.g. @e2e (blank = all)'
+        required: false
+        default: ''
+      file:
+        description: 'Only this test file or folder, e.g. src/tests/invitation/accept-invitation.spec.ts (blank = all)'
+        required: false
+        default: ''
+
+# Every run mutates the same shared workspace (seats, invites), so never overlap.
+concurrency:
+  group: e2e
+  cancel-in-progress: false
+
+jobs:
+  chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run format:check
+
+      - name: Run suite
+        # Inputs go through env, never inline into the script (injection).
+        run: |
+          args=()
+          [ -n "$INPUT_FILE" ] && args+=("$INPUT_FILE")
+          [ -n "$INPUT_TAG" ] && args+=(--grep "$INPUT_TAG")
+          npm test -- "${args[@]}"
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_FILE: ${{ inputs.file }}
+          CI: true
+          BASE_URL: ${{ vars.BASE_URL }}
+          WORKSPACE_ID: ${{ vars.WORKSPACE_ID }}
+          WORKSPACE_NAME: ${{ vars.WORKSPACE_NAME }}
+          # Unset → "2nd division". An existing group the group-assignment test invites into.
+          INVITE_GROUP_NAME: ${{ vars.INVITE_GROUP_NAME }}
+          # Unset → `api`. Set the repo variable to `ui` to fall back without a code change.
+          WORKSPACE_STATE: ${{ vars.WORKSPACE_STATE }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          INVITEE_EMAILS: ${{ secrets.INVITEE_EMAILS }}
+          INVITEE_PASSWORD: ${{ secrets.INVITEE_PASSWORD }}
+          # Isolated workspace for the seat-limit tests; nothing else may use it.
+          SEAT_ADMIN_EMAIL: ${{ secrets.SEAT_ADMIN_EMAIL }}
+          SEAT_ADMIN_PASSWORD: ${{ secrets.SEAT_ADMIN_PASSWORD }}
+          SEAT_WORKSPACE_ID: ${{ vars.SEAT_WORKSPACE_ID }}
+          SEAT_WORKSPACE_NAME: ${{ vars.SEAT_WORKSPACE_NAME }}
+
+      # The repo is public, so artifacts are downloadable by any GitHub user.
+      # The HTML report embeds traces/videos (session tokens, invite links), so
+      # only the JUnit summary is uploaded. Reproduce failures locally.
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: junit-results
+          path: reports/junit.xml
+          retention-days: 7

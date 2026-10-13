@@ -1,0 +1,3 @@
+# Normalise line endings in the repository so the suite reads identically on
+# Windows, macOS and Linux — including in CI, which runs on ubuntu-latest.
+* text=auto eol=lf
