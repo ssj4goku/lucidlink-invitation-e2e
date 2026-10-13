@@ -122,7 +122,7 @@ export const env = {
    * How cleanup and the sweep reach the workspace. `api` (default) calls the
    * app's own api/v2 with the admin's bearer token; `ui` drives the Members
    * page. Inviting is UI either way. Switch to `ui` if the undocumented API
-   * changes — see docs/guides/WORKSPACE-STATE-DRIVER.md.
+   * changes.
    */
   get WORKSPACE_STATE(): 'api' | 'ui' {
     const value = optional('WORKSPACE_STATE', 'api').toLowerCase();

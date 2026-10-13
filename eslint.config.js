@@ -41,7 +41,7 @@ export default tseslint.config(
         },
         {
           selector:
-            "CallExpression[callee.property.name=/^(getBy[A-Za-z]+|locator|frameLocator|\\$|\\$\\$)$/]",
+            'CallExpression[callee.property.name=/^(getBy[A-Za-z]+|locator|frameLocator|\\$|\\$\\$)$/]',
           message:
             'Do not create locators in specs. Add a locator or an action to the page object in src/pages or src/components and call that.',
         },
